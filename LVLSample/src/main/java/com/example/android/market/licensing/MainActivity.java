@@ -189,8 +189,20 @@ public class MainActivity extends Activity {
             // This is a polite way of saying the developer made a mistake
             // while setting up or calling the license checker library.
             // Please examine the error code and fix the error.
-            String result = String.format(getString(R.string.application_error), errorCode);
+            String result = String.format(getString(R.string.application_error), verboseResponseCode(errorCode) + " (" + errorCode + ")");
             displayResult(result);
+        }
+
+        private String verboseResponseCode(int responseCode) {
+            switch (responseCode) {
+                case LicenseCheckerCallback.ERROR_INVALID_PACKAGE_NAME: return "invalid package name error";
+                case LicenseCheckerCallback.ERROR_NON_MATCHING_UID: return "non matching UID error";
+                case LicenseCheckerCallback.ERROR_NOT_MARKET_MANAGED: return "not market managed error";
+                case LicenseCheckerCallback.ERROR_CHECK_IN_PROGRESS: return "check in progress error";
+                case LicenseCheckerCallback.ERROR_INVALID_PUBLIC_KEY: return "invalid public key error";
+                case LicenseCheckerCallback.ERROR_MISSING_PERMISSION: return "missing permission error";
+                default: return null;
+            }
         }
     }
 

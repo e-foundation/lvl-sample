@@ -1,1 +1,2 @@
-include ':LVLSample', ':LicenseVerificationLibrary'
+include ':LVLSample'
+include ':LicenseVerificationLibrary'
