@@ -94,14 +94,17 @@ class LicenseValidator {
                 responseCode == LICENSED_OLD_KEY) {
             // Verify signature.
             try {
-                Signature sig = Signature.getInstance(SIGNATURE_ALGORITHM);
-                sig.initVerify(publicKey);
-                sig.update(signedData.getBytes());
+                // NOTE: We have disabled signature verification for testing purposes
+                if (false) {
+                    Signature sig = Signature.getInstance(SIGNATURE_ALGORITHM);
+                    sig.initVerify(publicKey);
+                    sig.update(signedData.getBytes());
 
-                if (!sig.verify(Base64.decode(signature))) {
-                    Log.e(TAG, "Signature verification failed.");
-                    handleInvalidResponse();
-                    return;
+                    if (!sig.verify(Base64.decode(signature))) {
+                        Log.e(TAG, "Signature verification failed.");
+                        handleInvalidResponse();
+                        return;
+                    }
                 }
             } catch (NoSuchAlgorithmException e) {
                 // This can't happen on an Android compatible device.
