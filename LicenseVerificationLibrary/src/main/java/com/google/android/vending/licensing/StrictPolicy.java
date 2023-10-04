@@ -26,7 +26,7 @@ package com.google.android.vending.licensing;
  * weigh the risks of using this Policy over one which implements caching,
  * such as ServerManagedPolicy.
  * <p>
- * Access to the application is only allowed if a LICESNED response is.
+ * Access to the application is only allowed if a LICESNED response is
  * received. All other responses (including RETRY) will deny access.
  */
 public class StrictPolicy implements Policy {

@@ -22,6 +22,7 @@ import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.Policy;
 import com.google.android.vending.licensing.ServerManagedPolicy;
+import com.google.android.vending.licensing.StrictPolicy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -96,9 +97,8 @@ public class MainActivity extends Activity {
         mLicenseCheckerCallback = new MyLicenseCheckerCallback();
         // Construct the LicenseChecker with a policy.
         mChecker = new LicenseChecker(
-            this, new ServerManagedPolicy(this,
-                new AESObfuscator(SALT, getPackageName(), deviceId)),
-            BASE64_PUBLIC_KEY);
+            this, new StrictPolicy(),
+            null);
         doCheck();
     }
 
