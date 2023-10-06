@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2023 /e/ foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,8 @@
 
 package com.android.vending.licensing;
 
-import com.android.vending.licensing.ILicenseResultListener;
-import com.android.vending.licensing.ILicenseV2ResultListener;
-
 // Android library projects do not yet support AIDL, so this has been
 // precompiled into the src directory.
-oneway interface ILicensingService {
-  void checkLicense(long nonce, String packageName, in ILicenseResultListener listener);
-  void checkLicenseV2(String packageName, ILicenseV2ResultListener listener, in Bundle extraParams);
+oneway interface ILicenseV2ResultListener {
+  void verifyLicense(int responseCode, in Bundle responsePayload);
 }

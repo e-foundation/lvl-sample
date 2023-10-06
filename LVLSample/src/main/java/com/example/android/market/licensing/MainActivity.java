@@ -17,23 +17,13 @@
 //package com.example.android.market.licensing;
 package com.example.android.market.licensing;
 
-import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
-import com.google.android.vending.licensing.Policy;
-import com.google.android.vending.licensing.ServerManagedPolicy;
-import com.google.android.vending.licensing.StrictPolicy;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings.Secure;
-import android.view.View;
+import android.support.annotation.UiThread;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
@@ -57,7 +47,7 @@ import android.widget.TextView;
  * <a href="http://developer.android.com/guide/publishing/licensing.html">
  * licensing documentation.</a>
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements LicenseCheckerV2.OnResponse, LicenseCheckerV1.OnResponse {
     private static final String BASE64_PUBLIC_KEY = "REPLACE THIS WITH YOUR PUBLIC KEY";
 
     // Generate your own 20 random bytes, and put them here.
@@ -69,8 +59,12 @@ public class MainActivity extends Activity {
     private TextView mStatusText;
     private Button mCheckLicenseButton;
 
+    private TextView mStatusText2;
+    private Button mCheckLicenseButton2;
+
     private LicenseCheckerCallback mLicenseCheckerCallback;
-    private LicenseChecker mChecker;
+    private LicenseCheckerV1 mChecker;
+    private LicenseCheckerV2 mChecker2;
     // A handler on the UI thread.
     private Handler mHandler;
 
@@ -82,55 +76,36 @@ public class MainActivity extends Activity {
 
         mStatusText = (TextView) findViewById(R.id.status_text);
         mCheckLicenseButton = (Button) findViewById(R.id.check_license_button);
-        mCheckLicenseButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                doCheck();
-            }
-        });
+        mCheckLicenseButton.setOnClickListener(view -> doCheck());
+
+        mStatusText2 = (TextView) findViewById(R.id.status_text_2);
+        mCheckLicenseButton2 = (Button) findViewById(R.id.check_license_button_2);
+        mCheckLicenseButton2.setOnClickListener(view -> doCheckV2());
 
         mHandler = new Handler();
-
-        // Try to use more data here. ANDROID_ID is a single point of attack.
-        String deviceId = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 
         // Library calls this when it's done.
         mLicenseCheckerCallback = new MyLicenseCheckerCallback();
         // Construct the LicenseChecker with a policy.
-        mChecker = new LicenseChecker(
-            this, new StrictPolicy(),
-            null);
+        mChecker = new LicenseCheckerV1(
+            this);
+        mChecker2 = new LicenseCheckerV2(
+            this
+        );
         doCheck();
-    }
-
-    protected Dialog onCreateDialog(int id) {
-        final boolean bRetry = id == 1;
-        return new AlertDialog.Builder(this)
-            .setTitle(R.string.unlicensed_dialog_title)
-            .setMessage(bRetry ? R.string.unlicensed_dialog_retry_body : R.string.unlicensed_dialog_body)
-            .setPositiveButton(bRetry ? R.string.retry_button : R.string.buy_button, new DialogInterface.OnClickListener() {
-                boolean mRetry = bRetry;
-                public void onClick(DialogInterface dialog, int which) {
-                    if ( mRetry ) {
-                        doCheck();
-                    } else {
-                        Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(
-                                "http://market.android.com/details?id=" + getPackageName()));
-                            startActivity(marketIntent);                        
-                    }
-                }
-            })
-            .setNegativeButton(R.string.quit_button, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            }).create();
+        doCheckV2();
     }
 
     private void doCheck() {
         mCheckLicenseButton.setEnabled(false);
-        setProgressBarIndeterminateVisibility(true);
         mStatusText.setText(R.string.checking_license);
-        mChecker.checkAccess(mLicenseCheckerCallback);
+        mChecker.checkAccess(this);
+    }
+
+    private void doCheckV2() {
+        mCheckLicenseButton2.setEnabled(false);
+        mStatusText2.setText(R.string.checking_license);
+        mChecker2.checkAccess(this);
     }
 
     private void displayResult(final String result) {
@@ -142,16 +117,24 @@ public class MainActivity extends Activity {
             }
         });
     }
-    
-    private void displayDialog(final boolean showRetry) {
-        mHandler.post(new Runnable() {
-            public void run() {
-                setProgressBarIndeterminateVisibility(false);
-                showDialog(showRetry ? 1 : 0);
-                mCheckLicenseButton.setEnabled(true);
-            }
-        });
-    }    
+
+    @Override
+    @UiThread
+    public void onResponseV2(int code, String jwt) {
+        mStatusText2.setText(
+            getString(R.string.result_v2, Util.responseCodeAsText(code), (jwt == null? "(none)" : jwt))
+        );
+        mCheckLicenseButton2.setEnabled(true);
+    }
+
+    @Override
+    public void onResponse(int responseCode, String signedData, String signature) {
+        mStatusText.setText(
+            getString(R.string.result_v1, Util.responseCodeAsText(responseCode), signedData, (signature == null? "(none)" : signature))
+        );
+        mCheckLicenseButton.setEnabled(true);
+    }
+
 
     private class MyLicenseCheckerCallback implements LicenseCheckerCallback {
         public void allow(int policyReason) {
@@ -178,7 +161,6 @@ public class MainActivity extends Activity {
             // If the reason for the lack of license is that the service is
             // unavailable or there is another problem, we display a
             // retry button on the dialog and a different message.
-            displayDialog(policyReason == Policy.RETRY);
         }
 
         public void applicationError(int errorCode) {
@@ -210,6 +192,7 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         mChecker.onDestroy();
+        mChecker2.onDestroy();
     }
 
 }

@@ -22,12 +22,9 @@
     <string name="dont_allow">License check has failed: user has no license</string>
     <string name="allow">License check has passed (though the signature cannot be verified for technical reasons)</string>
     <string name="application_error">Error returned: %1$s</string>
+    <string name="result_v1">V1 license check has returned the following result:\n\n%1$s\n\nData: %2$s\n\nSignature: %3$s</string>
+    <string name="result_v2">V2 license check has returned the following result:\n\n%1$s\n\nJWT: %2$s</string>
 
-    <!-- Unlicensed dialog messages -->
-    <string name="unlicensed_dialog_title">Application not licensed</string>
-    <string name="unlicensed_dialog_body">This application is not licensed. Please purchase it from Android Market.</string>
-    <string name="unlicensed_dialog_retry_body">Unable to validate license. Check to see if a network connection is available.</string>
-    <string name="buy_button">Buy app</string>
-    <string name="retry_button">Retry</string>
-    <string name="quit_button">Exit</string>
+    <string name="v1">V1</string>
+    <string name="v2">V2</string>
 </resources>

@@ -31,7 +31,7 @@ package com.google.android.vending.licensing;
  */
 public class StrictPolicy implements Policy {
 
-    private int mLastResponse;
+    protected int mLastResponse;
 
     public StrictPolicy() {
         // Set default policy. This will force the application to check the policy on launch.
